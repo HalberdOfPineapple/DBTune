@@ -84,9 +84,10 @@ def parse_args(file):
     cf = DictParser()
     cf.read(file, encoding="utf-8")
     config_dict = cf.read_dict()
+    
     global knob_config
-    f = open(config_dict['database']['knob_config_file'])
-    knob_config = json.load(f)
+    with open(config_dict['database']['knob_config_file'], 'r') as f:
+        knob_config = json.load(f)
 
     return get_default_dict(config_dict["database"]), get_default_dict(config_dict['tune'])
 

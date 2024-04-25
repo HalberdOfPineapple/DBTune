@@ -41,6 +41,8 @@ from autotune.optimizer.ddpg_optimizer import DDPG_Optimizer
 import pdb
 from autotune.knobs import ts, logger
 
+# PG_ALL_KNOBS = '/data2/ruike/DBTune/scripts/experiment/gen_knobs/postgres_all.json'
+PG_ALL_KNOBS = '/mnt/c/Users/Viktor/Desktop/Cam_2023_2024/Research_Project/DBTune/scripts/experiment/gen_knobs/postgres_all.json'
 class PipleLine(BOBase):
     """
     Basic Advisor Class, which adopts a policy to sample a configuration.
@@ -97,16 +99,20 @@ class PipleLine(BOBase):
         self.selector_type = selector_type
         self.optimizer_type = optimizer_type
         self.config_space_all = config_space
+
         self.incremental = incremental  # none, increase, decrease
         self.incremental_every = incremental_every  # how often increment the number of knobs
         self.incremental_num = incremental_num  # how many knobs to increment each time
+
         self.num_hps_max = len(self.config_space_all.get_hyperparameters())
         self.num_hps_init = num_hps_init if not num_hps_init == -1 else self.num_hps_max
         self.num_metrics = num_metrics
+
         self.selector = KnobSelector(self.selector_type)
         self.random_state = random_state
         self.current_context = None
         self.space_transfer = space_transfer
+
         self.only_knob = only_knob
         self.only_range = only_range
         self.knob_config_file = knob_config_file
@@ -124,16 +130,16 @@ class PipleLine(BOBase):
                 self.source_workloadL = ['sysbench', 'oltpbench_twitter', 'job', 'tpch']
                 self.source_workloadL.remove(hold_out_workload)
                 self.ranker = xgb.XGBRanker(
-                # tree_method='gpu_hist',
-                booster='gbtree',
-                objective='rank:pairwise',
-                random_state=42,
-                learning_rate=0.1,
-                colsample_bytree=0.9,
-                eta=0.05,
-                max_depth=6,
-                n_estimators=110,
-                subsample=0.75
+                    # tree_method='gpu_hist',
+                    booster='gbtree',
+                    objective='rank:pairwise',
+                    random_state=42,
+                    learning_rate=0.1,
+                    colsample_bytree=0.9,
+                    eta=0.05,
+                    max_depth=6,
+                    n_estimators=110,
+                    subsample=0.75
                 )
                 self.ranker.load_model("tools/xgboost_test_{}.json".format(hold_out_workload))
                 self.history_workload_data =  history_workload_data
@@ -142,9 +148,10 @@ class PipleLine(BOBase):
                 with open("tools/{}_best_optimizer.pkl".format(hold_out_workload), 'rb') as f:
                     self.best_method_id_list = pickle.load(f)
 
-        self.logger.info("Total space size:{}".format(estimate_size(self.config_space, '/data2/ruike/DBTune/scripts/experiment/gen_knobs/postgres_all.json')))
+        self.logger.info("Total space size:{}".format(estimate_size(self.config_space, PG_ALL_KNOBS)))
         self.iter_begin_time = time.time()
         advisor_kwargs = advisor_kwargs or {}
+
         # init history container
         if self.num_objs == 1:
             self.history_container = HistoryContainer(task_id=self.task_id,
@@ -158,6 +165,7 @@ class PipleLine(BOBase):
                                                         ref_point=ref_point)
         # load history container if exists
         self.load_history()
+
         if not self.auto_optimizer:
             if optimizer_type in ('MBO', 'SMAC', 'auto'):
                 self.optimizer = BO_Optimizer(config_space,
@@ -450,12 +458,14 @@ class PipleLine(BOBase):
 
     def iterate(self, compact_space=None):
         self.knob_selection()
+
         #get configuration suggestion
         if self.space_transfer and len(self.history_container.configurations) < self.init_num:
-            #space transfer: use best source config to init
+            # space transfer: use best source config to init
             config = self.initial_configurations[len(self.history_container.configurations)]
         else:
             config = self.optimizer.get_suggestion(history_container=self.history_container, compact_space=compact_space)
+
         if self.space_transfer:
             if len(self.history_container.get_incumbents()):
                 config = impute_incumb_values(config, self.history_container.get_incumbents()[0][0])
@@ -494,11 +504,11 @@ class PipleLine(BOBase):
     def evaluate(self, config):
         iter_time = time.time() - self.iter_begin_time
         trial_state = SUCCESS
+
         start_time = time.time()
         objs, constraints, em, resource, im, info, trial_state = self.objective_function(config)
         if trial_state == FAILED :
             objs = self.FAILED_PERF
-
         elapsed_time = time.time() - start_time
 
         self.iter_begin_time = time.time()

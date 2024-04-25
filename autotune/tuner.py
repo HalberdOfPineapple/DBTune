@@ -15,12 +15,13 @@ class DBTuner:
         self.create_output_folders()
         self.args_tune = args_tune
         self.args_db = args_db
+
         self.method = args_tune['optimize_method']
         self.y_variable = env.y_variable
         self.transfer_framework = args_tune['transfer_framework']
         self.hc_path = self.args_tune['data_repo']
-        self.space_transfer = eval(self.args_tune['space_transfer'])
-        self.auto_optimizer = eval(self.args_tune['auto_optimizer'])
+        self.space_transfer = None if 'space_transfer' not in self.args_tune else eval(self.args_tune['space_transfer'])
+        self.auto_optimizer = None if 'auto_optimizer' not in self.args_tune else eval(self.args_tune['auto_optimizer'])
 
         self.hcL = list()
         self.history_workload_data = list()
@@ -172,8 +173,8 @@ class DBTuner:
                        auto_optimizer_type= self.args_tune['auto_optimizer_type'],
                        hold_out_workload=self.args_db['workload'],
                        history_workload_data=self.history_workload_data,
-                       only_knob=eval(self.args_tune['only_knob']),
-                       only_range=eval(self.args_tune['only_range']))
+                       only_knob=False if 'only_knob' not in self.args_tune else eval(self.args_tune['only_knob']),
+                       only_range=False if 'only_range' not in self.args_tune else eval(self.args_tune['only_range']))
         history = bo.run()
         if history.num_objs == 1:
             import matplotlib.pyplot as plt

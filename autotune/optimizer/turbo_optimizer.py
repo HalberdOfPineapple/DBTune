@@ -162,7 +162,7 @@ class TURBO_Optimizer:
         else:
             raise ValueError('Unknown initial design strategy: %s.' % init_strategy)
 
-    def get_suggestion(self, history_container: HistoryContainer):
+    def get_suggestion(self, history_container: HistoryContainer, compact_space=None):
         # if have enough data, get_suggorate
         num_config_evaluated = len(history_container.configurations)
         if num_config_evaluated < self.init_num:

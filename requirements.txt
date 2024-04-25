@@ -1,6 +1,5 @@
 pandas
 numpy
-scikit_learn==0.22.2.post1
 torch>=1.5.0
 mysql-connector-python-rf
 ConfigSpace==0.4.21
@@ -15,7 +14,6 @@ psutil
 pyDOE
 #kdtree
 scipy
-sklearn
 cython
 scikit-optimize
 smac

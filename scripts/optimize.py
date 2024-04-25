@@ -17,6 +17,8 @@ if __name__ == '__main__':
         db = MysqlDB(args_db)
     elif args_db['db'] == 'postgresql':
         db = PostgresqlDB(args_db)
+    else:
+        raise ValueError(f"Invalid DB Type: {args_db['db']}")
 
     env = DBEnv(args_db, args_tune, db)
     tuner = DBTuner(args_db, args_tune, env)
